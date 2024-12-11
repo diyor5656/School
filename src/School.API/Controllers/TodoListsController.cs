@@ -1,13 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using N_Tier.Application.Models;
-using N_Tier.Application.Models.TodoItem;
-using N_Tier.Application.Models.TodoList;
-using N_Tier.Application.Services;
-using N_Tier.Core.Entities;
+using School.Application.Models;
+using School.Application.Models.TodoItem;
+using School.Application.Models.TodoList;
+using School.Application.Services;
+using School.Core.Entities;
 
-namespace N_Tier.API.Controllers;
+namespace School.API.Controllers;
 
 //[Authorize]
+
+[ApiController]
+[Route("api/[controller]")]
 public class TodoListsController : ApiController
 {
     private readonly ITodoItemService _todoItemService;

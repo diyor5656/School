@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using School.Application.Models;
+using School.Application.Models.User;
 using School.Application.Services;
-
 
 namespace School.API.Controllers;
 
+[ApiController]
+[Route("api/[controller]")]
 public class UsersController : ApiController
 {
     private readonly IUserService _userService;

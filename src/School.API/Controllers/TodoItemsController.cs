@@ -4,9 +4,11 @@ using School.Application.Models;
 using School.Application.Models.TodoItem;
 using School.Application.Services;
 
-namespace N_Tier.API.Controllers;
+namespace School.API.Controllers;
 
 //[Authorize]
+[ApiController]
+[Route("api/[controller]")]
 public class TodoItemsController : ApiController
 {
     private readonly ITodoItemService _todoItemService;

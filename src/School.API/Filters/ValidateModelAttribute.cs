@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using N_Tier.Application.Models;
+using School.Application.Models;
 
-namespace N_Tier.API.Filters;
+namespace School.API.Filters;
 
 public class ValidateModelAttribute : Attribute, IAsyncResultFilter
 {

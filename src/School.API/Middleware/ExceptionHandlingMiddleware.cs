@@ -1,9 +1,9 @@
-﻿using N_Tier.Application.Exceptions;
-using N_Tier.Application.Models;
-using N_Tier.Core.Exceptions;
+﻿using School.Application.Exceptions;
+using School.Application.Models;
+using School.Core.Exceptions;
 using Newtonsoft.Json;
 
-namespace N_Tier.API.Middleware;
+namespace School.API.Middleware;
 
 public class ExceptionHandlingMiddleware
 {

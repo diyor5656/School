@@ -1,21 +1,24 @@
 ﻿using School.Core.Common;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace School.Core.Entities
 {
     public class Lesson : BaseEntity, IAuditedEntity
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
+        public Guid GroupId { get; set; }
+        public virtual Group Group { get; set; }
         public string Name { get; set; }
-        public int RoomId { get; set; }
-        public virtual Room Room { get; set; }
-        public int Number { get; set; }
+        public Guid TeacherId { get; set; }
+        public virtual Teacher Teacher { get; set; }
+
         public string? CreatedBy { get; set; }
-
-        public DateTime CreatedOn { get; set; } = DateTime.Now;
-
-        public string? UpdatedBy { get; set; } = string.Empty;
-
+        public DateTime CreatedOn { get; set; }
+        public string? UpdatedBy { get; set; }
         public DateTime? UpdatedOn { get; set; }
     }
 }
-

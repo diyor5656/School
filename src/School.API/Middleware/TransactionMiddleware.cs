@@ -1,6 +1,6 @@
-﻿using N_Tier.DataAccess.Persistence;
+﻿using School.DataAccess.Persistence;
 
-namespace N_Tier.API.Middleware;
+namespace School.API.Middleware;
 
 public class TransactionMiddleware
 {

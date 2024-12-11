@@ -1,12 +1,14 @@
 ﻿using School.Core.Common;
+using School.Core.Enums;
 
 namespace School.Core.Entities
 {
     public class Employee : BaseEntity, IAuditedEntity
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public int Age { get; set; }
+        public Guid Id { get; set; }
+        public Guid UserId { get; set; }
+        public virtual User User { get; set; }
+        public EmployeeStatus Status { get; set; }
 
         public string? CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
