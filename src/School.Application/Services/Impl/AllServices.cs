@@ -612,7 +612,7 @@ namespace School.Application.Services.Impl
         }
     }
 
-    public class CertificateService : IAllService
+    public class CertificateService : ICertificateService
     {
         private readonly IMapper _mapper;
         private readonly ICertificateRepository _certificateRepository;
@@ -660,7 +660,7 @@ namespace School.Application.Services.Impl
         }
     }
 
-    public class CourseService : IAllService
+    public class CourseService : ICourseService
     {
         private readonly IMapper _mapper;
         private readonly ICourseRepository _courseRepository;
@@ -708,7 +708,7 @@ namespace School.Application.Services.Impl
         }
     }
 
-    public class EnrollmentService : IAllService
+    public class EnrollmentService : IEnrollmentService
     {
         private readonly IMapper _mapper;
         private readonly IEnrollmentRepository _enrollmentRepository;
@@ -853,7 +853,7 @@ namespace School.Application.Services.Impl
         }
     }
 
-    public class PaymentService : IAllService
+    public class PaymentService : IPaymentService
     {
         private readonly IMapper _mapper;
         private readonly IPyamentRepository _paymentRepository;
@@ -901,7 +901,7 @@ namespace School.Application.Services.Impl
         }
     }
 
-    public class LessonService : IAllService
+    public class LessonService : ILessonService
     {
         private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
@@ -949,7 +949,7 @@ namespace School.Application.Services.Impl
         }
     }
 
-    public class LessonScheduleService : IAllService
+    public class LessonScheduleService : ILessonScheduleService
     {
         private readonly IMapper _mapper;
         private readonly ILessonScheduleRepository _lessonScheduleRepository;
@@ -997,7 +997,7 @@ namespace School.Application.Services.Impl
         }
     }
 
-    public class TeacherSubService : IAllService
+    public class TeacherSubService : ITeacherSubService
     {
         private readonly IMapper _mapper;
         private readonly ITeachSubRepository _teacherSubRepository;
