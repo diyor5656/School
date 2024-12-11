@@ -16,6 +16,8 @@ namespace School.Application.Models.ModelsByS.LessonSchedule
 
     public class UpdateLessonScheduleModel
     {
+        internal readonly Guid LessonId;
+
         public Guid RoomId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }

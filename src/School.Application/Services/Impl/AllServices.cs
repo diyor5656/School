@@ -516,53 +516,78 @@ namespace School.Application.Services.Impl
     }
 
 
-    public class AnnouncementService : IAnnouncementService
-    {
-        private readonly IMapper _mapper;
-        private readonly IAttendanceRepository _announcementRepository;
-        private readonly IMemoryCache _memoryCache;
+    //public class AnnouncementService : IAnnouncementService
+    //{
+    //    private readonly IMapper _mapper;
+    //    private readonly IAttendanceRepository _announcementRepository;
+    //    private readonly IMemoryCache _memoryCache;
 
-        public AnnouncementService(IAttendanceRepository announcementRepository, IMapper mapper, IMemoryCache memoryCache)
-        {
-            _announcementRepository = announcementRepository;
-            _mapper = mapper;
-            _memoryCache = memoryCache;
-        }
+    //    public AnnouncementService(IAttendanceRepository announcementRepository, IMapper mapper, IMemoryCache memoryCache)
+    //    {
+    //        _announcementRepository = announcementRepository;
+    //        _mapper = mapper;
+    //        _memoryCache = memoryCache;
+    //    }
 
-        public async Task<CreateAnnouncementResponseModel> CreateAsync(CreateAnnouncementModel createAnnouncementModel, CancellationToken cancellationToken)
-        {
-            var announcement = _mapper.Map<Announcement>(createAnnouncementModel);
-            var createdAnnouncement = await _announcementRepository.AddAsync(announcement);
+    //    public async Task<CreateAnnouncementResponseModel> CreateAsync(CreateAnnouncementModel createAnnouncementModel, CancellationToken cancellationToken)
+    //    {
+    //        var announcement = _mapper.Map<Announcement>(createAnnouncementModel);
+    //        var createdAnnouncement = await _announcementRepository.AddAsync(announcement);
 
-            return new CreateAnnouncementResponseModel
-            {
-                Id = createdAnnouncement.Id
-            };
-        }
+    //        return new CreateAnnouncementResponseModel
+    //        {
+    //            Id = createdAnnouncement.Id
+    //        };
+    //    }
 
-        public async Task<BaseResponseModel> DeleteAsync(Guid id, CancellationToken cancellationToken)
-        {
-            var announcement = await _announcementRepository.GetFirstAsync(a => a.Id == id);
-            if (announcement == null) throw new NotFoundException("Announcement not found");
+    //    public async Task<BaseResponseModel> DeleteAsync(Guid id, CancellationToken cancellationToken)
+    //    {
+    //        var announcement = await _announcementRepository.GetByIdAsync(id);
+    //        if (announcement == null) throw new NotFoundException("Announcement not found");
 
-            var deletedAnnouncement = await _announcementRepository.DeleteAsync(announcement);
-            return new BaseResponseModel { Id = deletedAnnouncement.Id };
-        }
+    //        await _announcementRepository.DeleteAsync(announcement);
 
-        public async Task<AnnouncementResponseModel> GetByIdAsync(Guid id)
-        {
-            var announcement = await _announcementRepository.GetFirstAsync(a => a.Id == id);
-            if (announcement == null) throw new NotFoundException($"Announcement with id {id} not found");
+    //        return new BaseResponseModel
+    //        {
+    //            Id = announcement.Id
+    //        };
+    //    }
 
-            return _mapper.Map<AnnouncementResponseModel>(announcement);
-        }
+    //    public async Task<IEnumerable<AnnouncementResponseModel>> GetAllAsync()
+    //    {
+    //        var announcements = await _announcementRepository.GetAllAsync();
+    //        return _mapper.Map<IEnumerable<AnnouncementResponseModel>>(announcements);
+    //    }
 
-        public async Task<IEnumerable<AnnouncementResponseModel>> GetAllAsync()
-        {
-            var announcements = await _announcementRepository.GetAllAsync(a => true);
-            return _mapper.Map<List<AnnouncementResponseModel>>(announcements);
-        }
-    }
+    //    public async Task<AnnouncementResponseModel> GetByIdAsync(Guid id)
+    //    {
+    //        var announcement = await _announcementRepository.GetByIdAsync(id);
+    //        if (announcement == null) throw new NotFoundException("Announcement not found");
+
+    //        return _mapper.Map<AnnouncementResponseModel>(announcement);
+    //    }
+
+    //    public async Task<UpdateAnnouncementResponseModel> UpdateAsync(Guid id, UpdateAnnouncementModel updateAnnouncementModel, CancellationToken cancellationToken)
+    //    {
+    //        // Get the existing announcement by Id
+    //        var announcement = await _announcementRepository.GetByIdAsync(id);
+    //        if (announcement == null)
+    //            throw new NotFoundException($"Announcement with id {id} not found");
+
+    //        // Update the fields
+    //        announcement.Message = updateAnnouncementModel.Message;
+
+    //        // Save the updated announcement
+    //        var updatedAnnouncement = await _announcementRepository.UpdateAsync(announcement);
+
+    //        // Return the updated announcement response
+    //        return new UpdateAnnouncementResponseModel
+    //        {
+    //            Id = updatedAnnouncement.Id
+    //        };
+    //    }
+    //}
+
 
     public class AttendanceService : IAttendanceService
     {
@@ -610,6 +635,25 @@ namespace School.Application.Services.Impl
             var attendances = await _attendanceRepository.GetAllAsync(a => true);
             return _mapper.Map<List<AttendanceResponseModel>>(attendances);
         }
+
+        public async Task<UpdateAttendanceResponseModel> UpdateAsync(Guid id, UpdateAttendanceModel updateAttendanceModel, CancellationToken cancellationToken)
+        {
+            var attendance = await _attendanceRepository.GetFirstAsync(a => a.Id == id);
+            if (attendance == null)
+                throw new NotFoundException($"Attendance record with id {id} not found");
+
+            
+            attendance.Status = updateAttendanceModel.Status;
+            attendance.Date = updateAttendanceModel.Date;
+
+            var updatedAttendance = await _attendanceRepository.UpdateAsync(attendance);
+
+            
+            return new UpdateAttendanceResponseModel
+            {
+                Id = updatedAttendance.Id
+            };
+        }
     }
 
     public class CertificateService : ICertificateService
@@ -617,6 +661,30 @@ namespace School.Application.Services.Impl
         private readonly IMapper _mapper;
         private readonly ICertificateRepository _certificateRepository;
         private readonly IMemoryCache _memoryCache;
+
+        public CertificateService(ICertificateRepository certificateRepository, IMapper mapper)
+        {
+            _certificateRepository = certificateRepository;
+            _mapper = mapper;
+        }
+
+        public async Task<UpdateCertificateResponseModel> UpdateAsync(Guid id, UpdateCertificateModel updateCertificateModel, CancellationToken cancellationToken)
+        {
+            var certificate = await _certificateRepository.GetFirstAsync(c => c.Id == id);
+            if (certificate == null)
+                throw new NotFoundException($"Certificate record with id {id} not found");
+
+            certificate.StudentId = updateCertificateModel.StudentId;
+            certificate.CourseId = updateCertificateModel.CourseId;
+            certificate.IssuedDate = updateCertificateModel.IssuedDate;
+
+            var updatedCertificate = await _certificateRepository.UpdateAsync(certificate);
+
+            return new UpdateCertificateResponseModel
+            {
+                Id = updatedCertificate.Id
+            };
+        }
 
         public CertificateService(ICertificateRepository certificateRepository, IMapper mapper, IMemoryCache memoryCache)
         {
@@ -666,6 +734,30 @@ namespace School.Application.Services.Impl
         private readonly ICourseRepository _courseRepository;
         private readonly IMemoryCache _memoryCache;
 
+        public CourseService(ICourseRepository courseRepository, IMapper mapper)
+        {
+            _courseRepository = courseRepository;
+            _mapper = mapper;
+        }
+
+        public async Task<UpdateCourseResponseModel> UpdateAsync(Guid id, UpdateCourseModel updateCourseModel, CancellationToken cancellationToken)
+        {
+            var course = await _courseRepository.GetFirstAsync(c => c.Id == id);
+            if (course == null)
+                throw new NotFoundException($"Course record with id {id} not found");
+
+            course.Name = updateCourseModel.Name;
+            course.CategoryId = updateCourseModel.CategoryId;
+            course.Duration = updateCourseModel.Duration;
+
+            var updatedCourse = await _courseRepository.UpdateAsync(course);
+
+            return new UpdateCourseResponseModel
+            {
+                Id = updatedCourse.Id
+            };
+        }
+
         public CourseService(ICourseRepository courseRepository, IMapper mapper, IMemoryCache memoryCache)
         {
             _courseRepository = courseRepository;
@@ -714,6 +806,31 @@ namespace School.Application.Services.Impl
         private readonly IEnrollmentRepository _enrollmentRepository;
         private readonly IMemoryCache _memoryCache;
 
+        public EnrollmentService(IEnrollmentRepository enrollmentRepository, IMapper mapper)
+        {
+            _enrollmentRepository = enrollmentRepository;
+            _mapper = mapper;
+        }
+
+        public async Task<UpdateEnrollmentResponseModel> UpdateAsync(Guid id, UpdateEnrollmentModel updateEnrollmentModel, CancellationToken cancellationToken)
+        {
+            var enrollment = await _enrollmentRepository.GetFirstAsync(e => e.Id == id);
+            if (enrollment == null)
+                throw new NotFoundException($"Enrollment record with id {id} not found");
+
+            enrollment.StudentId = updateEnrollmentModel.StudentId;
+            enrollment.CourseId = updateEnrollmentModel.CourseId;
+            enrollment.EnrollmentDate = updateEnrollmentModel.EnrollmentDate;
+
+            var updatedEnrollment = await _enrollmentRepository.UpdateAsync(enrollment);
+
+            return new UpdateEnrollmentResponseModel
+            {
+                Id = updatedEnrollment.Id
+            };
+        }
+
+
         public EnrollmentService(IEnrollmentRepository enrollmentRepository, IMapper mapper, IMemoryCache memoryCache)
         {
             _enrollmentRepository = enrollmentRepository;
@@ -757,7 +874,7 @@ namespace School.Application.Services.Impl
     }
 
 
-    public class EventService : IAllService
+    public class EventService : IEventService
     {
         private readonly IMapper _mapper;
         private readonly IEventRepository _eventRepository;
@@ -768,6 +885,31 @@ namespace School.Application.Services.Impl
             _eventRepository = eventRepository;
             _mapper = mapper;
             _memoryCache = memoryCache;
+        }
+
+        public EventService(IEventRepository eventRepository, IMapper mapper)
+        {
+            _eventRepository = eventRepository;
+            _mapper = mapper;
+        }
+
+        public async Task<UpdateEventResponseModel> UpdateAsync(Guid id, UpdateEventModel updateEventModel, CancellationToken cancellationToken)
+        {
+            var eventEntity = await _eventRepository.GetFirstAsync(e => e.Id == id);
+            if (eventEntity == null)
+                throw new NotFoundException($"Event record with id {id} not found");
+
+            eventEntity.Name = updateEventModel.Name;
+            eventEntity.Description = updateEventModel.Description;
+            eventEntity.EventDate = updateEventModel.EventDate;
+            eventEntity.Location = updateEventModel.Location;
+
+            var updatedEvent = await _eventRepository.UpdateAsync(eventEntity);
+
+            return new UpdateEventResponseModel
+            {
+                Id = updatedEvent.Id
+            };
         }
 
         public async Task<CreateEventResponseModel> CreateAsync(CreateEventModel createEventModel, CancellationToken cancellationToken)
@@ -805,11 +947,34 @@ namespace School.Application.Services.Impl
         }
     }
 
-    public class FeedbackService : IAllService
+    public class FeedbackService : IFeedbackService
     {
         private readonly IMapper _mapper;
         private readonly IFeedBackRepository _feedbackRepository;
         private readonly IMemoryCache _memoryCache;
+
+        public FeedbackService(IFeedBackRepository feedbackRepository, IMapper mapper)
+        {
+            _feedbackRepository = feedbackRepository;
+            _mapper = mapper;
+        }
+
+        public async Task<UpdateFeedbackResponseModel> UpdateAsync(Guid id, UpdateFeedbackModel updateFeedbackModel, CancellationToken cancellationToken)
+        {
+            var feedback = await _feedbackRepository.GetFirstAsync(f => f.Id == id);
+            if (feedback == null)
+                throw new NotFoundException($"Feedback record with id {id} not found");
+
+            feedback.Comments = updateFeedbackModel.Comments;
+            feedback.Rating = updateFeedbackModel.Rating;
+
+            var updatedFeedback = await _feedbackRepository.UpdateAsync(feedback);
+
+            return new UpdateFeedbackResponseModel
+            {
+                Id = updatedFeedback.Id
+            };
+        }
 
         public FeedbackService(IFeedBackRepository feedbackRepository, IMapper mapper, IMemoryCache memoryCache)
         {
@@ -866,6 +1031,30 @@ namespace School.Application.Services.Impl
             _memoryCache = memoryCache;
         }
 
+        public PaymentService(IPyamentRepository paymentRepository, IMapper mapper)
+        {
+            _paymentRepository = paymentRepository;
+            _mapper = mapper;
+        }
+
+        public async Task<UpdatePaymentResponseModel> UpdateAsync(Guid id, UpdatePaymentModel updatePaymentModel, CancellationToken cancellationToken)
+        {
+            var payment = await _paymentRepository.GetFirstAsync(p => p.Id == id);
+            if (payment == null)
+                throw new NotFoundException($"Payment record with id {id} not found");
+
+            payment.Amount = updatePaymentModel.Amount;
+            payment.PaymentDate = updatePaymentModel.PaymentDate;
+            payment.PaymentType = updatePaymentModel.PaymentType;
+
+            var updatedPayment = await _paymentRepository.UpdateAsync(payment);
+
+            return new UpdatePaymentResponseModel
+            {
+                Id = updatedPayment.Id
+            };
+        }
+
         public async Task<CreatePaymentResponseModel> CreateAsync(CreatePaymentModel createPaymentModel, CancellationToken cancellationToken)
         {
             var payment = _mapper.Map<Payment>(createPaymentModel);
@@ -907,6 +1096,29 @@ namespace School.Application.Services.Impl
         private readonly ILessonRepository _lessonRepository;
         private readonly IMemoryCache _memoryCache;
 
+        public LessonService(ILessonRepository lessonRepository, IMapper mapper)
+        {
+            _lessonRepository = lessonRepository;
+            _mapper = mapper;
+        }
+
+        public async Task<UpdateLessonResponseModel> UpdateAsync(Guid id, UpdateLessonModel updateLessonModel, CancellationToken cancellationToken)
+        {
+            var lesson = await _lessonRepository.GetFirstAsync(l => l.Id == id);
+            if (lesson == null)
+                throw new NotFoundException($"Lesson record with id {id} not found");
+
+            lesson.GroupId = updateLessonModel.GroupId;
+            lesson.Name = updateLessonModel.Name;
+            lesson.TeacherId = updateLessonModel.TeacherId;
+
+            var updatedLesson = await _lessonRepository.UpdateAsync(lesson);
+
+            return new UpdateLessonResponseModel
+            {
+                Id = updatedLesson.Id
+            };
+        }
         public LessonService(ILessonRepository lessonRepository, IMapper mapper, IMemoryCache memoryCache)
         {
             _lessonRepository = lessonRepository;
@@ -955,6 +1167,30 @@ namespace School.Application.Services.Impl
         private readonly ILessonScheduleRepository _lessonScheduleRepository;
         private readonly IMemoryCache _memoryCache;
 
+        public LessonScheduleService(ILessonScheduleRepository lessonScheduleRepository, IMapper mapper)
+        {
+            _lessonScheduleRepository = lessonScheduleRepository;
+            _mapper = mapper;
+        }
+
+        public async Task<UpdateLessonScheduleResponseModel> UpdateAsync(Guid id, UpdateLessonScheduleModel updateLessonScheduleModel, CancellationToken cancellationToken)
+        {
+            var lessonSchedule = await _lessonScheduleRepository.GetFirstAsync(ls => ls.Id == id);
+            if (lessonSchedule == null)
+                throw new NotFoundException($"LessonSchedule record with id {id} not found");
+
+            lessonSchedule.LessonId = updateLessonScheduleModel.LessonId;
+            lessonSchedule.RoomId = updateLessonScheduleModel.RoomId;
+            lessonSchedule.StartTime = updateLessonScheduleModel.StartTime;
+            lessonSchedule.EndTime = updateLessonScheduleModel.EndTime;
+
+            var updatedLessonSchedule = await _lessonScheduleRepository.UpdateAsync(lessonSchedule);
+
+            return new UpdateLessonScheduleResponseModel
+            {
+                Id = updatedLessonSchedule.Id
+            };
+        }
         public LessonScheduleService(ILessonScheduleRepository lessonScheduleRepository, IMapper mapper, IMemoryCache memoryCache)
         {
             _lessonScheduleRepository = lessonScheduleRepository;
@@ -1009,7 +1245,28 @@ namespace School.Application.Services.Impl
             _mapper = mapper;
             _memoryCache = memoryCache;
         }
+        public TeacherSubService(ITeachSubRepository teacherSubRepository, IMapper mapper)
+        {
+            _teacherSubRepository = teacherSubRepository;
+            _mapper = mapper;
+        }
 
+        public async Task<UpdateTeacherSubResponseModel> UpdateAsync(Guid id, UpdateTeacherSubModel updateTeacherSubModel, CancellationToken cancellationToken)
+        {
+            var teacherSub = await _teacherSubRepository.GetFirstAsync(ts => ts.Id == id);
+            if (teacherSub == null)
+                throw new NotFoundException($"Teacher-Subject record with id {id} not found");
+
+            teacherSub.TeacherId = updateTeacherSubModel.TeacherId;
+            teacherSub.SubjectId = updateTeacherSubModel.SubjectId;
+
+            var updatedTeacherSub = await _teacherSubRepository.UpdateAsync(teacherSub);
+
+            return new UpdateTeacherSubResponseModel
+            {
+                Id = updatedTeacherSub.Id
+            };
+        }
         public async Task<CreateTeacherSubResponseModel> CreateAsync(CreateTeacherSubModel createTeacherSubModel, CancellationToken cancellationToken)
         {
             var teacherSub = _mapper.Map<TeachSub>(createTeacherSubModel);

@@ -17,7 +17,9 @@ using System.Threading.Tasks;
 
         public class UpdateAttendanceModel
         {
-            public string Status { get; set; }
+        internal DateTime Date;
+
+        public string Status { get; set; }
         }
 
         public class AttendanceResponseModel

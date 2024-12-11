@@ -16,6 +16,8 @@ namespace School.Application.Models.ModelsByS.Certificate
     public class UpdateCertificateModel
     {
         public DateTime IssuedDate { get; set; }
+        public Guid StudentId { get; internal set; }
+        public Guid CourseId { get; internal set; }
     }
 
     public class CertificateResponseModel

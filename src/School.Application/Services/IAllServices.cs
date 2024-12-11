@@ -196,14 +196,13 @@ namespace School.Application.Services.ServicesByS
 
     public interface IAnnouncementService
     {
-        Task<CreateAnnouncementResponseModel> CreateAsync(CreateAnnouncementModel createAnnouncementModel,
-            CancellationToken cancellationToken = default);
+        Task<CreateAnnouncementResponseModel> CreateAsync(CreateAnnouncementModel createAnnouncementModel, CancellationToken cancellationToken = default);
         Task<BaseResponseModel> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
         Task<IEnumerable<AnnouncementResponseModel>> GetAllAsync();
         Task<AnnouncementResponseModel> GetByIdAsync(Guid id);
-        Task<UpdateAnnouncementResponseModel> UpdateAsync(Guid id,
-            UpdateAnnouncementModel updateAnnouncementModel, CancellationToken cancellationToken = default);
+        Task<UpdateAnnouncementResponseModel> UpdateAsync(Guid id, UpdateAnnouncementModel updateAnnouncementModel, CancellationToken cancellationToken = default);
     }
+
 
     public interface IAttendanceService
     {

@@ -16,6 +16,8 @@ namespace School.Application.Models.ModelsByS.Enrollment
     public class UpdateEnrollmentModel
     {
         public DateTime EnrollmentDate { get; set; }
+        public Guid StudentId { get; internal set; }
+        public Guid CourseId { get; internal set; }
     }
 
     public class EnrollmentResponseModel
