@@ -18,6 +18,7 @@ namespace School.DataAccess.Persistence
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
         }
+  
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<TodoItem> TodoItems { get; set; }
