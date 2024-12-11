@@ -3,15 +3,25 @@ using Microsoft.Extensions.Caching.Memory;
 using School.Application.Exceptions;
 using School.Application.Models;
 using School.Application.Models.AllModels;
+using School.Application.Models.ModelsByS.Attendance;
 using School.Application.Models.ModelsByS.Category;
+using School.Application.Models.ModelsByS.Certificate;
+using School.Application.Models.ModelsByS.Course;
 using School.Application.Models.ModelsByS.Employee;
+using School.Application.Models.ModelsByS.Enrollment;
+using School.Application.Models.ModelsByS.Event;
 using School.Application.Models.ModelsByS.Exam;
+using School.Application.Models.ModelsByS.Feedback;
 using School.Application.Models.ModelsByS.Group;
+using School.Application.Models.ModelsByS.Lesson;
+using School.Application.Models.ModelsByS.LessonSchedule;
+using School.Application.Models.ModelsByS.Payment;
 using School.Application.Models.ModelsByS.Person;
 using School.Application.Models.ModelsByS.Raiting;
 using School.Application.Models.ModelsByS.Room;
 using School.Application.Models.ModelsByS.Student;
 using School.Application.Models.ModelsByS.Subject;
+using School.Application.Models.ModelsByS.TeacherSub;
 using School.Application.Services.ServicesByS;
 using School.Core.Entities;
 using School.DataAccess.Repositories;
@@ -798,10 +808,10 @@ namespace School.Application.Services.Impl
     public class FeedbackService : IAllService
     {
         private readonly IMapper _mapper;
-        private readonly IFeedbackRepository _feedbackRepository;
+        private readonly IFeedBackRepository _feedbackRepository;
         private readonly IMemoryCache _memoryCache;
 
-        public FeedbackService(IFeedbackRepository feedbackRepository, IMapper mapper, IMemoryCache memoryCache)
+        public FeedbackService(IFeedBackRepository feedbackRepository, IMapper mapper, IMemoryCache memoryCache)
         {
             _feedbackRepository = feedbackRepository;
             _mapper = mapper;
@@ -846,10 +856,10 @@ namespace School.Application.Services.Impl
     public class PaymentService : IAllService
     {
         private readonly IMapper _mapper;
-        private readonly IPaymentRepository _paymentRepository;
+        private readonly IPyamentRepository _paymentRepository;
         private readonly IMemoryCache _memoryCache;
 
-        public PaymentService(IPaymentRepository paymentRepository, IMapper mapper, IMemoryCache memoryCache)
+        public PaymentService(IPyamentRepository paymentRepository, IMapper mapper, IMemoryCache memoryCache)
         {
             _paymentRepository = paymentRepository;
             _mapper = mapper;
@@ -990,10 +1000,10 @@ namespace School.Application.Services.Impl
     public class TeacherSubService : IAllService
     {
         private readonly IMapper _mapper;
-        private readonly ITeacherSubRepository _teacherSubRepository;
+        private readonly ITeachSubRepository _teacherSubRepository;
         private readonly IMemoryCache _memoryCache;
 
-        public TeacherSubService(ITeacherSubRepository teacherSubRepository, IMapper mapper, IMemoryCache memoryCache)
+        public TeacherSubService(ITeachSubRepository teacherSubRepository, IMapper mapper, IMemoryCache memoryCache)
         {
             _teacherSubRepository = teacherSubRepository;
             _mapper = mapper;
@@ -1002,7 +1012,7 @@ namespace School.Application.Services.Impl
 
         public async Task<CreateTeacherSubResponseModel> CreateAsync(CreateTeacherSubModel createTeacherSubModel, CancellationToken cancellationToken)
         {
-            var teacherSub = _mapper.Map<TeacherSub>(createTeacherSubModel);
+            var teacherSub = _mapper.Map<TeachSub>(createTeacherSubModel);
             var createdTeacherSub = await _teacherSubRepository.AddAsync(teacherSub);
 
             return new CreateTeacherSubResponseModel
