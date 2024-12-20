@@ -1,154 +1,90 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using School.Application.Common.Email;
-using School.Application.Exceptions;
+﻿using Microsoft.AspNetCore.Identity;
 using School.Application.Helpers;
-using School.Application.Models;
 using School.Application.Models.User;
-using School.Application.Templates;
-using School.DataAccess.Identity;
+using School.Core.Entities;
+using School.Core.Enums;
+using School.DataAccess.Repositories;
 
 namespace School.Application.Services.Impl;
 
 public class UserService : IUserService
 {
-    private readonly IConfiguration _configuration;
-    private readonly IEmailService _emailService;
-    private readonly IMapper _mapper;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly ITemplateService _templateService;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly ILogger<UserService> _logger;
+    private readonly IUserRepository _accountRepository;
+    private readonly JwtHelper _jwtHelper;
 
-    public UserService(IMapper mapper,
-        UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager,
-        IConfiguration configuration,
-        ITemplateService templateService,
-        IEmailService emailService,
-        ILogger<UserService> logger)
+    public UserService(IUserRepository accountRepository, JwtHelper jwtHelper)
     {
-        _mapper = mapper;
-        _userManager = userManager;
-        _signInManager = signInManager;
-        _configuration = configuration;
-        _templateService = templateService;
-        _emailService = emailService;
-        _logger = logger;
+        _accountRepository = accountRepository;
+        _jwtHelper = jwtHelper;
     }
 
-    public async Task<CreateUserResponseModel> CreateAsync(CreateUserModel createUserModel)
+    public async Task RegisterAsync(string username, string firstname, string password, UserRole role)
     {
-        //Password -- &,$ kabi belgi son va Bosh va kichik harflardan katta bo'lsin
-        var user = _mapper.Map<ApplicationUser>(createUserModel);
-        var result = await _userManager.CreateAsync(user, createUserModel.Password);
-
-        if (!result.Succeeded)
+        var newAccount = new User
         {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            _logger.LogError("Failed to create user: {Errors}", errors);
-            throw new BadRequestException(errors);
-        }
-
-        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var emailTemplate = await _templateService.GetTemplateAsync(TemplateConstants.ConfirmationEmail);
-
-        if (string.IsNullOrEmpty(emailTemplate))
-        {
-            _logger.LogError("Email template not found for user creation.");
-            throw new BadRequestException("Email template not found.");
-        }
-
-        var emailBody = _templateService.ReplaceInTemplate(emailTemplate,
-            new Dictionary<string, string> { { "{UserId}", user.Id }, { "{Token}", token } });
-
-        await _emailService.SendEmailAsync(EmailMessage.Create(user.Email, emailBody, "[School] Confirm your email"));
-
-        return new CreateUserResponseModel
-        {
-            Id = Guid.Parse(user.Id)
+            UserName = username,
+            FirstName = firstname,
+            Id = Guid.NewGuid(),
+            UserRole = role // Assign the provided role
         };
+        var passHash = new PasswordHasher<User>().HashPassword(newAccount, password);
+        newAccount.PasswordHash = passHash;
+        await _accountRepository.AddAsync(newAccount); // Asinxron chaqiruv
     }
 
-    public async Task<LoginResponseModel> LoginAsync(LoginUserModel loginUserModel)
+    public async Task<string> LoginAsync(string username, string password)
     {
-        var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == loginUserModel.Username);
+        // Foydalanuvchini olish
+        var account = await _accountRepository.GetUserByUsernameAsync(username);
 
-        if (user == null)
+        if (account == null)
         {
-            _logger.LogWarning("Login failed for username: {Username}", loginUserModel.Username);
-            throw new BadRequestException("Username or password is incorrect");
+            throw new Exception("Invalid username or password");
         }
 
-        var signInResult = await _signInManager.PasswordSignInAsync(user, loginUserModel.Password, false, false);
+        // Parolni tekshirish
+        var result = new PasswordHasher<User>()
+            .VerifyHashedPassword(account, account.PasswordHash, password);
 
-        if (!signInResult.Succeeded)
+        if (result == PasswordVerificationResult.Success)
         {
-            _logger.LogWarning("Login failed for username: {Username}", loginUserModel.Username);
-            throw new BadRequestException("Username or password is incorrect");
+            return _jwtHelper.GenerateToken(account); // Token yaratish
         }
-
-        var token = JwtHelper.GenerateToken(user, _configuration);
-
-        return new LoginResponseModel
+        else
         {
-            Username = user.UserName,
-            Email = user.Email,
-            Token = token
-        };
+            throw new Exception("Invalid username or password");
+        }
     }
 
-    public async Task<ConfirmEmailResponseModel> ConfirmEmailAsync(ConfirmEmailModel confirmEmailModel)
+    public async Task ChangePasswordAsync(Guid userId, string currentPassword, string newPassword)
     {
-        var user = await _userManager.FindByIdAsync(confirmEmailModel.UserId);
+        // Foydalanuvchini olish
+        var account = await _accountRepository.GetByIdAsync(userId);
 
-        if (user == null)
+        if (account == null)
         {
-            _logger.LogWarning("Email confirmation failed: User not found with ID {UserId}", confirmEmailModel.UserId);
-            throw new UnprocessableRequestException("Your verification link is incorrect");
+            throw new Exception("Foydalanuvchi topilmadi");
         }
 
-        var result = await _userManager.ConfirmEmailAsync(user, confirmEmailModel.Token);
+        // Eski parolni tekshirish
+        var passwordHasher = new PasswordHasher<User>();
+        var verificationResult = passwordHasher.VerifyHashedPassword(account, account.PasswordHash, currentPassword);
 
-        if (!result.Succeeded)
+        if (verificationResult != PasswordVerificationResult.Success)
         {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            _logger.LogWarning("Email confirmation failed for user {UserId}: {Errors}", confirmEmailModel.UserId, errors);
-            throw new UnprocessableRequestException("Your verification link has expired");
+            throw new Exception("Joriy parol noto'g'ri");
         }
 
-        return new ConfirmEmailResponseModel
-        {
-            Confirmed = true
-        };
+        // Yangi parolni xesh qilish
+        var newPassHash = passwordHasher.HashPassword(account, newPassword);
+        account.PasswordHash = newPassHash;
+
+        // Yangilangan ma'lumotlarni saqlash
+        await _accountRepository.UpdateAsync(account); // Asinxron chaqiruv
     }
 
-    public async Task<BaseResponseModel> ChangePasswordAsync(Guid userId, ChangePasswordModel changePasswordModel)
+    Task<ConfirmEmailResponseModel> IUserService.ConfirmEmailAsync(ConfirmEmailModel confirmEmailModel)
     {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
-
-        if (user == null)
-        {
-            _logger.LogWarning("Change password failed: User not found with ID {UserId}", userId);
-            throw new NotFoundException("User not found");
-        }
-
-        var result = await _userManager.ChangePasswordAsync(user, changePasswordModel.OldPassword, changePasswordModel.NewPassword);
-
-        if (!result.Succeeded)
-        {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            _logger.LogError("Change password failed for user {UserId}: {Errors}", userId, errors);
-            throw new BadRequestException(errors);
-        }
-
-        return new BaseResponseModel
-        {
-            Id = Guid.Parse(user.Id)
-        };
+        throw new NotImplementedException();
     }
 }
-

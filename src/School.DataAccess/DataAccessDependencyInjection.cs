@@ -39,7 +39,7 @@ public static class DataAccessDependencyInjection
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         services.AddScoped<IExamRepository, ExamRepository>();
         services.AddScoped<IGroupRepository, GroupRepository>();
-        //services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRatingRepository, RatingRepository>();
         services.AddScoped<IRoomRepository, RoomRepository>();
         services.AddScoped<IStudentRepository, StudentRepository>();

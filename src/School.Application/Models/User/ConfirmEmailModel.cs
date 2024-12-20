@@ -10,4 +10,5 @@ public class ConfirmEmailModel
 public class ConfirmEmailResponseModel
 {
     public bool Confirmed { get; set; }
+    public bool IsSuccess { get; set; }
 }

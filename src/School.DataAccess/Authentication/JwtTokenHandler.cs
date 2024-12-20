@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using School.DataAccess.Authentication;
 using School.Core.Entities;
+using School.DataAccess.Identity;
 
 namespace School.DataAccess.Authentication;
 
@@ -19,13 +20,12 @@ public class JwtTokenHandler : IJwtTokenHandler
         this.jwtOption = options.Value;
     }
 
-    public JwtSecurityToken GenerateAccessToken(User user)
+    public JwtSecurityToken GenerateAccessToken(ApplicationUser user)
     {
         var claims = new List<Claim>()
         {
             new Claim(CustomClaimNames.Id, user.Id.ToString()),
-            new Claim(CustomClaimNames.Email, user.Email),
-            new Claim(CustomClaimNames.Role, Enum.GetName<UserRole>(user.Role))
+            new Claim(CustomClaimNames.Email, user.Email)
         };
 
         var authSigningKey = new SymmetricSecurityKey(

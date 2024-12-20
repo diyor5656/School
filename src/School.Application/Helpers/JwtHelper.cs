@@ -1,35 +1,41 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using School.Core.Entities;
 using School.DataAccess.Identity;
 
 namespace School.Application.Helpers;
 
-public static class JwtHelper
+public class JwtHelper
 {
-    public static string GenerateToken(ApplicationUser user, IConfiguration configuration)
+    private readonly IOptions<AuthSettings> options;
+
+    public JwtHelper(IOptions<AuthSettings> options)
     {
-        ////var secretKey = configuration.GetValue<string>("JwtConfiguration:SecretKey");
+        this.options = options;
+    }
+    public string GenerateToken(User account)
+    {
 
-        ////var key = Encoding.ASCII.GetBytes(secretKey);
+        var claims = new List<Claim>
+        {
+            new Claim("userName", account.UserName),
+            new Claim("id", account.Id.ToString()),
+            new Claim(ClaimTypes.Role, account.UserRole.ToString())// Add role to claims
+        };
 
-        ////var tokenHandler = new JwtSecurityTokenHandler();
+        var jwtToken = new JwtSecurityToken(
+            expires: DateTime.UtcNow.Add(options.Value.Expires),
+            claims: claims,
+            signingCredentials:
+            new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Value.SecretKey)),
+                SecurityAlgorithms.HmacSha256Signature));
 
-        ////var tokenDescriptor = new SecurityTokenDescriptor
-        ////{
-        ////    Subject = new ClaimsIdentity(new[]
-        ////    {
-        ////        new Claim(ClaimTypes.NameIdentifier, user.Id),
-        ////        new Claim(ClaimTypes.Name, user.UserName),
-        ////        new Claim(ClaimTypes.Email, user.Email)
-        ////    }),
-        ////    Expires = DateTime.UtcNow.AddDays(7),
-        ////    SigningCredentials =
-        ////        new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        ////};
-
-        ////var token = tokenHandler.CreateToken(tokenDescriptor);
-
-        ////return tokenHandler.WriteToken(token);
-
-        return "";
+        return new JwtSecurityTokenHandler().WriteToken(jwtToken);
     }
 }
+

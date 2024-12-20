@@ -5,10 +5,14 @@ using School.API.Filters;
 using School.API.Middleware;
 using School.Application;
 using School.Application.Models.Validators;
+using School.Application.Services;
 using School.Application.Services.Impl;
 using School.Application.Services.ServicesByS;
 using School.DataAccess;
 using School.DataAccess.Persistence;
+using School.DataAccess.Repositories.Impl;
+using School.DataAccess.Repositories;
+using School.Application.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +24,11 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining(typeof(IValidationsMarker));
 builder.Services.AddScoped<IAllService, CategoryService>();
 builder.Services.AddSwagger();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<JwtHelper>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 
 builder.Services.AddDataAccess(builder.Configuration)
     .AddApplication(builder.Environment);
